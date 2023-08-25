@@ -1,0 +1,26 @@
+https://www.elastic.co/guide/en/elasticsearch/reference/8.8/run-elasticsearch-locally.html
+
+
+
+docker network create elastic
+docker pull docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+docker run --name ES --net elastic -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" -t docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+
+remove single node option above to add nodes
+
+
+
+docker pull docker.elastic.co/kibana/kibana:8.8.0
+docker run --name kibana --net elastic -p 5601:5601 docker.elastic.co/kibana/kibana:8.8.0
+
+
+or simply run from docker desktop app the above two.
+
+New node addition
+
+docker run --name node3 --net elastic -p 9201:9201 docker.elastic.co/elasticsearch/elasticsearch:8.8.0
+
+//create enrollemt token for staring new node
+docker exec -it ES /usr/share/elasticsearch/bin/elasticsearch-create-enrollment-token -s node 
+
+docker run -e ES_JAVA_OPTS="-Xms1g -Xmx1g" -e ENROLLMENT_TOKEN=eyJ2ZXIiOiI4LjguMCIsImFkciI6WyIxNzIuMTguMC4yOjkyMDAiXSwiZmdyIjoiNGE5ZTM1OTA2ZWVmZTI5MDQxMDk2OWU3NjdhMTQ1NzM2ZmJhYjdmODcyMjdmNTZjMDdmMjNiNmZiZWRmZjYxOCIsImtleSI6Imczd2Zib2dCNnZIdDZDZlpFS05hOjZ4UENuY2dUUWM2T1RSQlF1WVRhU3cifQ== --name ESnode --net elastic -it docker.elastic.co/elasticsearch/elasticsearch:8.8.0

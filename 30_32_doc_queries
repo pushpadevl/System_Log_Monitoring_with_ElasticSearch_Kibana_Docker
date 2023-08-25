@@ -1,0 +1,58 @@
+get _cat/indices?v
+get _cat/shards?v
+get /_cluster/health
+
+get /products/_doc/100
+
+// lecture 30, concurrency issues
+post /products/_update/100?if_primary_term=2&if_seq_no=19
+{
+  "doc":{
+    "in_stock":123
+  }
+}
+
+//lecture 31, updating multiples docs
+put /products/_doc/101
+{
+  
+    "name": "Laptop",
+    "price": 432223,
+    "manf": "DELL",
+    "in_stock": 13,
+    "tags": [
+      "electronics"
+    ]
+  
+}
+
+get /products/_doc/101
+
+// to get all docs
+get /products/_search
+{
+  "query":{
+    "match_all": {}
+  }
+}
+//deleting the doc which did not have in_stock attr, causing the problem in update_by_query
+DELETE /products/_doc/jB2FbogByUoXxozGAgok
+
+
+POST /products/_update_by_query
+{
+  "conflicts": "proceed", 
+  "script":{    "source": "ctx._source.in_stock--"}
+  ,
+  "query":{
+    "match_all":{}
+  }
+}
+
+//_delete multiple docs
+post /products/_delete_by_query
+{
+  "query":{
+    "match_all": {}
+  }
+}

@@ -1,0 +1,45 @@
+get _cat/indices?v
+get _cat/shards?v
+get /_cluster/health
+
+get /products/_doc/100
+
+post /products/_update/100
+{
+  "script":{
+    "source": """
+      if (ctx._source.in_stock <=1){
+        ctx.op = 'delete';
+      }
+      ctx._source.in_stock--;
+      //ctx._source.tags.add("entertainment");
+      ctx._source.tags.remove(1);
+      //remove works with index(JAVA LISTS)
+    """
+  }
+}
+get /products/_doc/101
+
+// POST updates docs, in this case inserts too using upserts
+post /products/_update/101
+{
+  "script":{
+    "source": "ctx._source.in_stock++;"
+  },
+  "upsert":{
+    "name":"Blender",
+    "price":543,
+    "in_stock":5
+  }
+}
+
+//update prod 100
+// PUT replaces docs
+put /products/_doc/100
+{
+  "name":"Speakers",
+  "price":4323,
+  "manf":"Sony",
+  "in_stock":5,
+  "tags":["electronics"]
+}

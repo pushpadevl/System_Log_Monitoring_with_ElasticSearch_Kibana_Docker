@@ -1,0 +1,91 @@
+get _cat/indices?v
+get _cat/shards?v
+get /_cluster/health
+
+delete /products
+
+
+//scripts use the language PAINLESS based on JAVA
+put /products
+{
+  "settings":{
+    "number_of_shards":2,
+    "number_of_replicas":2
+  }
+}
+
+post /products/_doc
+{
+  "name":"pen",
+  "price":10,
+  "manf":"Linc"
+  
+}
+put /products/_doc/101
+{
+  "name":"laptop",
+  "price":100000,
+  "manf":"MSI",
+  "in-stock":2
+}
+get /products/_doc/100
+
+post /products/_update/100
+{
+  "doc":{
+    "in_stock":3
+  }
+}
+
+get /products/_doc/100
+
+post /products/_update/100
+{
+  "doc":{
+    "tags":["Stationary"]
+  }
+}
+
+post /products/_update/100
+{
+  "script":{
+    "source":"ctx._source.in_stock--"
+  }
+}
+post /products/_update/100
+{
+  "script":{
+    "source":"ctx._source.in_stock=10"
+  }
+}
+post /products/_update/100
+{
+  "script":{
+    "source":"ctx._source.in_stock-=params.quantity",
+    "params":{
+      "quantity":4
+    }
+  }
+}
+post /products/_update/100
+{
+  "script":{
+    "source": """
+      if (ctx._source.in_stock == 5){
+        ctx.op = 'noop';
+      }
+      ctx._source.in_stock=10;
+    """
+  }
+}
+post /products/_update/100
+{
+  "script":{
+    "source": """
+      if (ctx._source.in_stock <=1){
+        ctx.op = 'delete';
+      }
+      ctx._source.in_stock--;
+    """
+  }
+}

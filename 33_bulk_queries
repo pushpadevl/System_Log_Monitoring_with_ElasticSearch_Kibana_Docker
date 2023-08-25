@@ -1,0 +1,44 @@
+get _cat/indices?v
+get _cat/shards?v
+get /_cluster/health
+
+get /products/_doc/100
+
+
+
+//index, create, update, delete are actions
+//the second line is the doc values
+post /_bulk
+{ "index": {"_index":"products","_id":200} }
+{ "name": "Espresso Machine", "price": 199, "in_stock":5}
+{ "create":{"_index":"products","_id":201}}
+{ "name": "milk fountain", "price":149,"in_stock":14}
+
+//inside update action, _index is omitted becox it is used in post line
+post /products/_bulk
+{"update":{"_id":201}}
+{ "doc":{"price":129}}
+{"delete":{"_id":200}}
+
+get /products/_search
+{
+  "query":
+  {
+    "match_all": {}
+  }
+}
+
+/*Things to be aware of :
+  * HTTP content type header should be set as follows:
+    * Content-Type: application/x-ndjson
+    * application/json is accepted, but it's incorrect way
+  
+  * Console tool will handle this anyway
+    * But when using HTTP clients (curl), we need to handle this ourselves
+  
+  * Each line must end with a new line char ( \n or \r\n)
+    * Including the last line (last line shouljd be empty)
+    
+  * A failed action will not affect other actions ( that's why BULK api returns detailed info about each action)
+
+*/
